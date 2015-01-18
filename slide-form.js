@@ -117,9 +117,9 @@ var Forms = {
     return JSON.stringify(keystore);
   },
 
-  buildForm: function (form, fields) {
-    Slide.Block.getFlattenedFieldsForIdentifiers(['bank.card', 'name'], function (fs) {
-      var compiledFields = fs.map(function (field) {
+  buildForm: function (form, identifiers) {
+    Slide.Block.getFlattenedFieldsForIdentifiers(identifiers, function (fields) {
+      var compiledFields = fields.map(function (field) {
         if (field._type === 'text') {
           return Forms.textField(field._description);
         } else if (field._type === 'number') {
