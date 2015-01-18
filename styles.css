@@ -42,7 +42,7 @@ body {
   padding-bottom: 0;
   border-bottom: 0;
 }
-.form .select:before {
+.form li:before {
   content: attr(data-field);
   width: 100px;
   line-height: 25px;
