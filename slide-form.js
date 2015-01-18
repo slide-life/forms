@@ -38,8 +38,9 @@ var Forms = {
       "class": className,
       "data-field": field.name
     });
+    var input;
     if( className == "text" ) {
-      var input = $("<input>", {
+      input = $("<input>", {
         "type": field.type,
         "placeholder": "...",
         "autocorrect": "off",
@@ -47,7 +48,7 @@ var Forms = {
       });
       item.append(input);
     } else if( className == "select" ) {
-      var input = $("<input>", {
+      input = $("<input>", {
         "type": field.subType,
         "value": field.options[0],
         "readonly": true,
@@ -72,6 +73,10 @@ var Forms = {
       item.append(input);
       item.append(options);
     }
+
+    input.focusin(function() { Forms.onSwitchIntoField(field, this); });
+    input.focusout(function() { Forms.onSwitchOutOfField(field, this); });
+
     return item;
   },
 
@@ -115,6 +120,31 @@ var Forms = {
       keystore[key] = value;
     });
     return JSON.stringify(keystore);
+  },
+
+  onSwitchIntoField: function(field, input_element) {
+    input_element.removeClass("valid");
+    input_element.removeClass("invalid");
+  },
+
+  onSwitchOutOfField: function(field, input_element) {
+    var validate = Forms.fieldValidation(field);
+    if (! validate(input_element.val())) {
+      input_element.addClass("valid");
+      input_element.removeClass("invalid");
+    } else {
+      input_element.addClass("invalid");
+      input_element.removeClass("valid");
+    }
+  },
+
+  fieldValidation: function (field) {
+    return function (input) {
+      if ('_validation' in field) {
+        var regex = new RegExp(field['_validation']);
+        return regex.test(input);
+      }
+    };
   },
 
   buildForm: function (form, identifiers) {
