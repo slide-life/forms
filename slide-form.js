@@ -1,3 +1,9 @@
+function InvalidFieldType (message) {
+  this.message = message;
+}
+
+InvalidFieldType.prototype = new Error();
+
 var Forms = {
   listen: function() {
     $(".form li input").click(function(evt) {
@@ -22,6 +28,7 @@ var Forms = {
       }
     });
   },
+
   createField: function(field) {
     var className = "text";
     if( field.type == "select" ) {
@@ -67,17 +74,21 @@ var Forms = {
     }
     return item;
   },
+
   createForm: function(container, fields) {
     fields.forEach(function(field) {
       $(field).appendTo(container);
     });
   },
+
   textField: function(name) {
     return Forms.createField({ type: "text", name: name });
   },
+
   numberField: function(name) {
     return Forms.createField({ type: "number", name: name });
   },
+
   selectField: function(name, options, custom) {
     return Forms.createField({
       type: "select",
@@ -87,12 +98,14 @@ var Forms = {
       custom: custom
     });
   },
+
   populateForm: function(fields) {
     $(function() {
       Forms.createForm($(".form"), fields);
       Forms.listen();
     });
   },
+
   serializeForm: function() {
     var fields = $(".form").children("li");
     var keystore = {};
@@ -102,6 +115,31 @@ var Forms = {
       keystore[key] = value;
     });
     return JSON.stringify(keystore);
+  },
+
+  buildForm: function (form, fields) {
+    Slide.Block.getFlattenedFieldsForIdentifiers(['bank.card', 'name'], function (fs) {
+      var compiledFields = fs.map(function (field) {
+        if (field._type === 'text') {
+          return Forms.textField(field._description);
+        } else if (field._type === 'number') {
+          return Forms.numberField(field._description);
+        } else if (field._type === 'image') {
+          return Forms.textField(field._description);
+        } else if (field._type === 'tel') {
+          return Forms.textField(field._description);
+        } else if (field._type === 'date') {
+          return Forms.textField(field._description);
+        } else if (field._type === 'select') {
+          return Forms.selectField(field._description, field._options, true);
+        } else if (field._type === 'list') {
+          return Forms.textField(field._description);
+        } else {
+          throw new InvalidFieldType(field._type + ' is not a valid field type');
+        }
+      });
+      Forms.createForm(form, compiledFields);
+      Forms.listen();
+    }, []);
   }
 };
-
